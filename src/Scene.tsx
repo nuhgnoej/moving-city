@@ -4,52 +4,53 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { CatmullRomCurve3, Object3D } from "three";
 import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
+import CityGLTFBlocks from "./CityGLTFBlocks";
 
 // 간단한 "도시" 박스들 생성
-function CityBlocks() {
-  const blocks = useMemo(() => {
-    const arr: {
-      pos: [number, number, number];
-      size: [number, number, number];
-    }[] = [];
-    const grid = 6; // 6x6
-    const gap = 6;
-    for (let x = -grid; x <= grid; x++) {
-      for (let z = -grid; z <= grid; z++) {
-        // 중앙 도로 공간 비우기
-        if (Math.abs(x) < 2 && Math.abs(z) < 2) continue;
-        const h = 1.5 + Math.random() * 8; // 빌딩 높이
-        arr.push({
-          pos: [x * gap, h / 2, z * gap],
-          size: [2 + Math.random() * 2, h, 2 + Math.random() * 2],
-        });
-      }
-    }
-    return arr;
-  }, []);
+// function CityBlocks() {
+//   const blocks = useMemo(() => {
+//     const arr: {
+//       pos: [number, number, number];
+//       size: [number, number, number];
+//     }[] = [];
+//     const grid = 6; // 6x6
+//     const gap = 6;
+//     for (let x = -grid; x <= grid; x++) {
+//       for (let z = -grid; z <= grid; z++) {
+//         // 중앙 도로 공간 비우기
+//         if (Math.abs(x) < 2 && Math.abs(z) < 2) continue;
+//         const h = 1.5 + Math.random() * 8; // 빌딩 높이
+//         arr.push({
+//           pos: [x * gap, h / 2, z * gap],
+//           size: [2 + Math.random() * 2, h, 2 + Math.random() * 2],
+//         });
+//       }
+//     }
+//     return arr;
+//   }, []);
 
-  return (
-    <group>
-      {/* 바닥 */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[200, 200, 1, 1]} />
-        <meshStandardMaterial color="#1a2032" />
-      </mesh>
+//   return (
+//     <group>
+//       {/* 바닥 */}
+//       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+//         <planeGeometry args={[200, 200, 1, 1]} />
+//         <meshStandardMaterial color="#1a2032" />
+//       </mesh>
 
-      {/* 빌딩 */}
-      {blocks.map((b, i) => (
-        <mesh key={i} position={b.pos} castShadow receiveShadow>
-          <boxGeometry args={b.size} />
-          <meshStandardMaterial
-            color="#303a55"
-            metalness={0.1}
-            roughness={0.9}
-          />
-        </mesh>
-      ))}
-    </group>
-  );
-}
+//       {/* 빌딩 */}
+//       {blocks.map((b, i) => (
+//         <mesh key={i} position={b.pos} castShadow receiveShadow>
+//           <boxGeometry args={b.size} />
+//           <meshStandardMaterial
+//             color="#303a55"
+//             metalness={0.1}
+//             roughness={0.9}
+//           />
+//         </mesh>
+//       ))}
+//     </group>
+//   );
+// }
 
 // 도로 스플라인 만들기(폐곡선)
 function useRoadCurve() {
@@ -154,7 +155,16 @@ export default function Scene() {
 
   return (
     <group>
-      <CityBlocks />
+      {/* <CityBlocks /> */}
+      <CityGLTFBlocks
+        urls={[
+          "/models/building-a.glb",
+          "/models/building-b.glb",
+          "/models/building-c.glb",
+        ]}
+        grid={6}
+        gap={6}
+      />
       <Road curve={curve} />
       <Cars curve={curve} count={120} />
 
