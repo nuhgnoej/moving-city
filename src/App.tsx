@@ -1,50 +1,51 @@
-// /src/App.tsx (컨트롤 옵션 보강 + 새 파라미터 적용)
+// /src/App.tsx
+import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment } from "@react-three/drei";
-import Scene from "./Scene";
 import { useRef } from "react";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import CameraRig from "./CameraRig";
-import { Perf } from "r3f-perf";
+import Scene from "./Scene";
+import HDRBackground from "./HDRBackground"; // ✅ 추가
 
 export default function App() {
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
 
   return (
-    <div style={{ height: "100vh", width: "100vw", background: "#0d0f1a" }}>
+    <div style={{ height: "100vh", width: "100vw", background: "#000" }}>
       <Canvas
-        camera={{ position: [15, 15, 20], fov: 45, near: 0.1, far: 500 }}
         dpr={[1, 1.5]}
+        camera={{ position: [15, 15, 20], fov: 180, near: 0.1, far: 500 }}
+        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping }}
+        onCreated={({ gl }) => {
+          gl.outputColorSpace = THREE.SRGBColorSpace;
+          gl.toneMappingExposure = 1.05; // 0.9~1.3에서 조절
+        }}
       >
-        <color attach="background" args={["#0d0f1a"]} />
-        <fog attach="fog" args={["#0d0f1a", 10, 120]} />
+        {/* 1) 조명/반사용 Environment (PMREM) — 배경은 끔 */}
+        <Environment
+          files="/hdr/rogland_clear_night_4k.hdr"
+          /* background */ blur={0}
+        />
 
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[20, 30, 10]} intensity={1.2} castShadow />
+        {/* 2) 초선명 배경 — 원본 HDR을 그대로 백그라운드로 */}
+        <HDRBackground url="/hdr/rogland_clear_night_4k.hdr" />
 
         <Scene />
-        <Environment preset="city" />
-
         <OrbitControls
           ref={controlsRef}
           enableDamping
           dampingFactor={0.1}
-          enableZoom // ✅ 휠 줌 허용(기본 true지만 명시)
-          minDistance={10} // ✅ 줌 최소/최대 범위
+          minDistance={10}
           maxDistance={120}
         />
-
-        {/* 더 멀고 느린 시네마틱 */}
         <CameraRig
           controls={controlsRef}
-          radius={48}
-          height={18}
-          duration={52}
-          resumeDelayMs={700}
-          smoothness={7}
+          radius={62.7} // ✅ FOV에 맞춘 새 반경
+          height={20}
+          duration={56}
+          smoothness={8}
         />
-
-        <Perf position="top-left" />
       </Canvas>
     </div>
   );
